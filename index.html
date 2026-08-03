@@ -91,31 +91,43 @@
   .btn.block{width:100%;}
   .btn.sm{min-height:44px;font-size:16px;padding:10px 14px;border-radius:14px;}
   .btn:disabled{filter:grayscale(.6);opacity:.55;box-shadow:none;}
-  /* ===== Flip cards ===== */
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;}
-  .card{perspective:1000px;height:178px;cursor:pointer;transition:transform .25s cubic-bezier(.16,1,.3,1);}
+  /* ===== Flip cards carousel ===== */
+  .carousel{position:relative;overflow:hidden;border-radius:22px;padding:10px 0 6px;}
+  .carousel-track{display:flex;transition:transform .35s cubic-bezier(.16,1,.3,1);will-change:transform;}
+  .carousel-item{flex:0 0 100%;padding:0 14px;display:flex;justify-content:center;align-items:center;}
+  .card{perspective:1000px;width:min(320px,78vw);height:min(420px,58vh);min-height:340px;cursor:pointer;transition:transform .25s cubic-bezier(.16,1,.3,1);}
   .card-inner{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
   .card.flip .card-inner{transform:rotateY(180deg);}
-  .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden;}
+  .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden;}
   .card-front{background:linear-gradient(150deg,#FFE9C7,#FFD08A);}
-  .card-front .zi{font-size:78px;font-weight:900;color:var(--primary-d);line-height:1;text-shadow:0 3px 0 rgba(255,255,255,.5);}
-  .card-front .hint{position:absolute;bottom:10px;font-size:13px;color:var(--muted);font-weight:700;}
-  .card-back{background:#fff;transform:rotateY(180deg);padding:10px;justify-content:space-around;}
-  .card-back svg{width:62px;height:62px;}
-  .card-back .py{font-size:16px;color:var(--blue);font-weight:800;}
-  .card-back .mean{font-size:14px;color:var(--text);}
+  .card-front .zi{font-size:clamp(90px,24vw,150px);font-weight:900;color:var(--primary-d);line-height:1;text-shadow:0 4px 0 rgba(255,255,255,.5);}
+  .card-front .hint{position:absolute;bottom:14px;font-size:15px;color:var(--muted);font-weight:700;}
+  .card-back{background:#fff;transform:rotateY(180deg);padding:16px;justify-content:space-around;}
+  .card-back svg{width:clamp(90px,22vw,140px);height:clamp(90px,22vw,140px);}
+  .card-back .py{font-size:22px;color:var(--blue);font-weight:800;}
+  .card-back .mean{font-size:17px;color:var(--text);}
   .card.done .card-front{background:linear-gradient(150deg,#D8F5C8,#A8E08A);}
   .card.done .card-front .zi{color:#3e7d28;}
-  .done-badge{position:absolute;top:8px;right:8px;background:var(--green);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.22);}
-  .done-badge svg{width:18px;height:18px;}
-  .card-back .mini-btn{margin-top:4px;}
+  .done-badge{position:absolute;top:12px;right:12px;background:var(--green);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.22);}
+  .done-badge svg{width:20px;height:20px;}
+  .card-back .mini-btn{margin-top:8px;}
   .speak{
-    position:absolute;top:8px;left:8px;width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-    background:rgba(255,255,255,.85);color:var(--primary-d);display:flex;align-items:center;justify-content:center;
-    box-shadow:0 2px 6px rgba(0,0,0,.12);transition:transform .1s;z-index:2;
+    position:absolute;top:12px;left:12px;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.9);color:var(--primary-d);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .1s;z-index:2;
   }
-  .speak svg{width:20px;height:20px;}
+  .speak svg{width:24px;height:24px;}
   .speak:active{transform:scale(.9);}
+  .arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:none;background:#fff;color:var(--primary-d);box-shadow:0 4px 14px rgba(0,0,0,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:transform .1s,background .2s;}
+  .arrow:hover{background:#FFF3E0;}
+  .arrow:active{transform:translateY(-50%) scale(.92);}
+  .arrow svg{width:26px;height:26px;}
+  .arrow.prev{left:4px;}
+  .arrow.next{right:4px;}
+  .arrow:disabled{opacity:.35;cursor:not-allowed;}
+  .dots{display:flex;justify-content:center;gap:12px;margin-top:16px;}
+  .dot{width:14px;height:14px;border-radius:50%;background:#FFE3B3;border:2px solid transparent;cursor:pointer;transition:all .2s;}
+  .dot.active{background:var(--primary);transform:scale(1.25);}
   /* ===== Practice ===== */
   .practice-char{text-align:center;margin:6px 0 18px;position:relative;}
   .practice-char .big{font-size:100px;font-weight:900;color:var(--primary-d);line-height:1;text-shadow:0 4px 0 rgba(255,210,63,.4);}
@@ -133,7 +145,6 @@
   @keyframes pop{from{transform:scale(.85)}to{transform:scale(1)}}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .practice-foot{margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
-  .cards .card{animation:rise .45s both;}
   /* ===== Stars / level ===== */
   .ring-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
   .ring{position:relative;width:130px;height:130px;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(255,210,63,.4));}
@@ -192,9 +203,10 @@
   #fx{position:fixed;inset:0;pointer-events:none;z-index:80;display:none;}
   @media(max-width:560px){
     body{font-size:17px;}
-    .cards{grid-template-columns:repeat(2,1fr);}
     .opts{grid-template-columns:1fr;}
     .title{font-size:19px;}
+    .arrow{width:42px;height:42px;}
+    .arrow svg{width:22px;height:22px;}
   }
 </style>
 </head>
@@ -330,7 +342,7 @@ function attachMagnetic(){
 
 /* ===================== 状态 ===================== */
 const PREFIX='wb_shizi_';
-let S=null, mode='kid', kidView='home', prac={queue:[],idx:0,correct:0,locked:false};
+let S=null, mode='kid', kidView='home', prac={queue:[],idx:0,correct:0,locked:false}, carouselIdx=0;
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function load(){ const raw=localStorage.getItem(PREFIX+'state'); if(raw){ try{ S=JSON.parse(raw); }catch(e){ S=null; } } if(!S||!S.inited){ seed(); } rollDaily(); }
 function save(){ localStorage.setItem(PREFIX+'state',JSON.stringify(S)); }
@@ -359,7 +371,7 @@ function rollDaily(){
 function render(){
   const app=document.getElementById('app');
   app.innerHTML = (mode==='kid') ? renderKid() : renderParent();
-  if(mode==='kid' && kidView==='home') animateRing();
+  if(mode==='kid' && kidView==='home'){ animateRing(); afterRenderCarousel(); }
   attachMagnetic();
   window.scrollTo(0,0);
 }
@@ -380,14 +392,15 @@ function renderKid(){
       <div class="mt center"><button class="btn green" onclick="finishToday()">${starSvg('#fff')} ${done?'今天学完啦，真棒！':'一键完成今日'}</button></div>
       <p class="muted center mt">${done?'认字完成，去闯关领奖励吧～':'点卡片翻一翻，右上角小喇叭能听读音，认识就点“我认识啦”。'}</p>
     </div>`;
-  let cards=d.chars.map((z,i)=>{
+  let items=d.chars.map((z,i)=>{
     const c=LIB_MAP[z], lk=d.learned[z];
-    return `<div class="card${lk?' done':''}" id="card${i}" onclick="flip(${i})">
+    return `<div class="carousel-item">
+      <div class="card${lk?' done':''}" id="card${i}" data-idx="${i}">
         <div class="card-inner">
           <div class="card-face card-front">
             ${lk?'<div class="done-badge">'+checkSvg()+'</div>':''}
             <button class="speak" onclick="event.stopPropagation();speak('${z}','${c.py}')">${speakerSvg()}</button>
-            <span class="zi">${z}</span><span class="hint">点我翻面</span>
+            <span class="zi">${z}</span><span class="hint">点卡片翻面</span>
           </div>
           <div class="card-face card-back">
             <svg viewBox="0 0 100 100">${c.svg}</svg>
@@ -395,8 +408,17 @@ function renderKid(){
             ${lk?'<div class="mini-btn btn green sm" onclick="event.stopPropagation()">已认识</div>':'<div class="mini-btn btn sm" onclick="event.stopPropagation();markLearned(\''+z+'\')">我认识啦</div>'}
           </div>
         </div>
-      </div>`;
+      </div>
+    </div>`;
   }).join('');
+  const arrowSvg=(d)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="${d>0?'9 18 15 12 9 6':'15 18 9 12 15 6'}"/></svg>`;
+  const cards=`
+    <div class="carousel" id="cardCarousel">
+      <button class="arrow prev" id="carPrev" onclick="goCard(-1)">${arrowSvg(-1)}</button>
+      <div class="carousel-track" id="carTrack">${items}</div>
+      <button class="arrow next" id="carNext" onclick="goCard(1)">${arrowSvg(1)}</button>
+      <div class="dots">${d.chars.map((_,i)=>`<div class="dot${i===carouselIdx?' active':''}" onclick="setCard(${i})"></div>`).join('')}</div>
+    </div>`;
   const lvl=Math.floor(S.stars/10)+1, inLvl=S.stars%10, R=58, C=2*Math.PI*R;
   const C0=C, TGT=C*(1-inLvl/10);
   const rewards=S.rewards.map(r=>{
@@ -435,6 +457,35 @@ function renderKid(){
 function animateRing(){
   const el=document.getElementById('ringP'); if(!el) return;
   requestAnimationFrame(()=>{ el.style.strokeDashoffset=el.dataset.off; });
+}
+let carouselSwiping=false;
+function updateCarousel(){
+  const track=document.getElementById('carTrack'); if(!track) return;
+  track.style.transform=`translateX(-${carouselIdx*100}%)`;
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===carouselIdx));
+  const prev=document.getElementById('carPrev'), next=document.getElementById('carNext');
+  if(prev) prev.disabled=carouselIdx===0;
+  if(next) next.disabled=carouselIdx>=(S.daily?S.daily.chars.length:1)-1;
+}
+function goCard(dir){ const n=S.daily?S.daily.chars.length:1; carouselIdx=Math.max(0,Math.min(n-1,carouselIdx+dir)); updateCarousel(); }
+function setCard(i){ const n=S.daily?S.daily.chars.length:1; carouselIdx=Math.max(0,Math.min(n-1,i)); updateCarousel(); }
+function afterRenderCarousel(){
+  updateCarousel();
+  const track=document.getElementById('carTrack'); if(!track) return;
+  let sx=0;
+  track.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; carouselSwiping=false; },{passive:true});
+  track.addEventListener('touchmove',e=>{ if(Math.abs(e.touches[0].clientX-sx)>10) carouselSwiping=true; },{passive:true});
+  track.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)>40){ if(dx<0) goCard(1); else goCard(-1); }
+    else { carouselSwiping=false; }
+  });
+  document.querySelectorAll('.carousel-item .card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      if(carouselSwiping){ carouselSwiping=false; return; }
+      flip(parseInt(card.dataset.idx));
+    });
+  });
 }
 function renderPractice(){
   const q=prac.queue;
