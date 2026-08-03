@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>宝宝识字台</title>
+<style>
+  :root{
+    --bg:#FFF7E6;
+    --card:#FFFFFF;
+    --primary:#FF8C42;
+    --primary-d:#E76F24;
+    --blue:#4D96FF;
+    --green:#6AB04C;
+    --pink:#FF5D8F;
+    --yellow:#FFD23F;
+    --text:#3A3A3A;
+    --muted:#9A8C7A;
+    --line:#FFE3B3;
+    --radius:22px;
+    --shadow:0 6px 18px rgba(255,140,66,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#FFF7E6 0%,#FFE9D6 100%);
+    color:var(--text);
+    font-size:18px;
+    line-height:1.5;
+    min-height:100vh;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+  }
+  /* ===== Header ===== */
+  header{
+    position:sticky;top:0;z-index:30;
+    background:linear-gradient(90deg,var(--primary),#FFB05C);
+    color:#fff;
+    padding:14px 16px calc(14px + env(safe-area-inset-top));
+    padding-top:calc(14px + env(safe-area-inset-top));
+    box-shadow:0 4px 14px rgba(255,140,66,.3);
+  }
+  .head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .title{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800;letter-spacing:1px;}
+  .title svg{width:30px;height:30px;}
+  .backup{display:flex;gap:8px;}
+  .bk-btn{
+    background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.5);
+    border-radius:14px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;gap:5px;min-height:40px;
+  }
+  .bk-btn svg{width:16px;height:16px;}
+  .bk-btn:active{background:rgba(255,255,255,.35);}
+  .tabs{display:flex;gap:8px;margin-top:12px;}
+  .tab{
+    flex:1;text-align:center;padding:11px 0;border-radius:16px;font-weight:800;font-size:17px;
+    background:rgba(255,255,255,.25);color:#fff;cursor:pointer;border:2px solid transparent;min-height:48px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .tab svg{width:20px;height:20px;}
+  .tab.active{background:#fff;color:var(--primary-d);border-color:#fff;}
+  /* ===== Layout ===== */
+  main{max-width:760px;margin:0 auto;padding:16px;}
+  .section{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .sec-title{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;margin:0 0 14px;color:var(--primary-d);}
+  .sec-title svg{width:24px;height:24px;}
+  /* ===== 今天要处理 (handler) ===== */
+  .handler{
+    background:linear-gradient(120deg,#FFF3D6,#FFE0B8);
+    border:2px dashed var(--primary);
+  }
+  .handler.overdue{border-color:#FF4D4D;background:linear-gradient(120deg,#FFE3E3,#FFD0D0);}
+  .handler-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .handler h2{margin:0;font-size:21px;color:var(--primary-d);display:flex;align-items:center;gap:8px;}
+  .handler.overdue h2{color:#D12B2B;}
+  .progress-pill{background:#fff;border-radius:30px;padding:6px 14px;font-weight:800;color:var(--primary-d);font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .bar{height:14px;background:#FFE3B3;border-radius:10px;margin-top:12px;overflow:hidden;}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#9BD66B);border-radius:10px;transition:width .4s;}
+  /* ===== Buttons ===== */
+  .btn{
+    border:none;border-radius:18px;padding:14px 18px;font-size:19px;font-weight:800;cursor:pointer;
+    min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    color:#fff;background:var(--primary);box-shadow:0 4px 0 var(--primary-d);transition:transform .08s;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--primary-d);}
+  .btn svg{width:22px;height:22px;}
+  .btn.blue{background:var(--blue);box-shadow:0 4px 0 #2f6fd6;}
+  .btn.green{background:var(--green);box-shadow:0 4px 0 #4e8c39;}
+  .btn.pink{background:var(--pink);box-shadow:0 4px 0 #d23e6e;}
+  .btn.ghost{background:#fff;color:var(--primary-d);box-shadow:0 4px 0 var(--line);border:2px solid var(--line);}
+  .btn.block{width:100%;}
+  .btn.sm{min-height:44px;font-size:16px;padding:10px 14px;border-radius:14px;}
+  .btn:disabled{filter:grayscale(.6);opacity:.55;box-shadow:none;}
+  /* ===== Flip cards ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;}
+  .card{perspective:1000px;height:170px;cursor:pointer;}
+  .card-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+  .card.flip .card-inner{transform:rotateY(180deg);}
+  .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden;}
+  .card-front{background:linear-gradient(150deg,#FFE9C7,#FFD08A);}
+  .card-front .zi{font-size:74px;font-weight:900;color:var(--primary-d);line-height:1;}
+  .card-front .hint{position:absolute;bottom:10px;font-size:13px;color:var(--muted);font-weight:700;}
+  .card-back{background:#fff;transform:rotateY(180deg);padding:10px;justify-content:space-around;}
+  .card-back svg{width:64px;height:64px;}
+  .card-back .py{font-size:16px;color:var(--blue);font-weight:800;}
+  .card-back .mean{font-size:14px;color:var(--text);}
+  .card.done .card-front{background:linear-gradient(150deg,#D8F5C8,#A8E08A);}
+  .done-badge{position:absolute;top:8px;right:8px;background:var(--green);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+  .card-back .mini-btn{margin-top:4px;}
+  /* ===== Practice ===== */
+  .practice-char{text-align:center;margin:6px 0 18px;}
+  .practice-char .big{font-size:96px;font-weight:900;color:var(--primary-d);line-height:1;}
+  .practice-char svg{width:90px;height:90px;margin:0 auto;display:block;}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .opt{
+    background:#FFF3E0;border:3px solid var(--line);border-radius:18px;padding:18px 10px;
+    font-size:24px;font-weight:800;color:var(--primary-d);cursor:pointer;min-height:64px;
+    display:flex;align-items:center;justify-content:center;transition:transform .1s;
+  }
+  .opt:active{transform:scale(.96);}
+  .opt.correct{background:#D8F5C8;border-color:var(--green);color:#3e7d28;}
+  .opt.wrong{background:#FFE0E0;border-color:#FF6B6B;color:#c0392b;animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .practice-foot{margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  /* ===== Stars / level ===== */
+  .ring-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .ring{position:relative;width:130px;height:130px;flex:0 0 auto;}
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .ctr b{font-size:34px;color:var(--primary-d);line-height:1;}
+  .ring .ctr small{font-size:13px;color:var(--muted);font-weight:700;}
+  .level-info{flex:1;min-width:180px;}
+  .level-info .lv{font-size:26px;font-weight:900;color:var(--primary-d);}
+  .level-info p{margin:6px 0 0;color:var(--muted);font-size:15px;}
+  .rewards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;}
+  .reward{background:#FFF8EE;border:2px solid var(--line);border-radius:18px;padding:14px;text-align:center;}
+  .reward .ico{width:42px;height:42px;margin:0 auto 6px;}
+  .reward .nm{font-weight:800;font-size:16px;}
+  .reward .cost{color:var(--pink);font-weight:800;font-size:15px;margin:4px 0 8px;}
+  /* ===== Parent gate ===== */
+  .gate{max-width:420px;margin:30px auto;text-align:center;}
+  .gate .lock{width:80px;height:80px;margin:0 auto 14px;}
+  .gate input{
+    width:100%;font-size:28px;text-align:center;letter-spacing:14px;border:3px solid var(--line);
+    border-radius:16px;padding:14px;margin:14px 0;background:#fff;color:var(--text);min-height:56px;
+  }
+  .err{color:#D12B2B;font-weight:700;min-height:22px;margin-bottom:8px;}
+  /* ===== Lists ===== */
+  .item{display:flex;align-items:center;gap:12px;background:#FFF8EE;border:2px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;}
+  .item .info{flex:1;}
+  .item .info b{font-size:17px;}
+  .item .info small{display:block;color:var(--muted);font-size:13px;}
+  .item .acts{display:flex;gap:8px;}
+  .inline-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .inline-form input{
+    flex:1;min-width:140px;font-size:16px;padding:12px 14px;border:2px solid var(--line);border-radius:14px;background:#fff;min-height:48px;
+  }
+  .inline-form input[type=number]{max-width:120px;}
+  .row2{display:flex;gap:10px;flex-wrap:wrap;}
+  .row2>*{flex:1;min-width:160px;}
+  .tip{background:#FFF3D6;border:2px solid var(--yellow);border-radius:14px;padding:10px 14px;color:var(--primary-d);font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .tip svg{width:20px;height:20px;flex:0 0 auto;}
+  .muted{color:var(--muted);font-size:14px;}
+  .center{text-align:center;}
+  .mt{margin-top:14px;}
+  .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:14px 22px;border-radius:30px;font-weight:800;font-size:16px;opacity:0;pointer-events:none;transition:all .3s;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.3);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* ===== Parent view compact ===== */
+  .psec{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .psec h3{margin:0 0 12px;font-size:19px;color:var(--primary-d);display:flex;align-items:center;gap:8px;}
+  .psec h3 svg{width:22px;height:22px;}
+  /* mobile */
+  @media(max-width:560px){
+    body{font-size:17px;}
+    .cards{grid-template-columns:repeat(2,1fr);}
+    .opts{grid-template-columns:1fr;}
+    .title{font-size:19px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-row">
+    <div class="title">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7l3-3h10l3 3v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" fill="#fff"/><path d="M9 4h6v4H9z" fill="#FFD23F"/><circle cx="12" cy="13" r="2.4" fill="#FF8C42"/></svg>
+      宝宝识字台
+    </div>
+    <div class="backup">
+      <button class="bk-btn" onclick="exportJSON()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0l-4-4m4 4l4-4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        导出
+      </button>
+      <button class="bk-btn" onclick="document.getElementById('imp').click()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 15V5m0 0l-4 4m4-4l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        导入
+      </button>
+      <input id="imp" type="file" accept=".json,application/json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tabKid" onclick="switchMode('kid')">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#fff"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+      孩子模式
+    </div>
+    <div class="tab" id="tabPar" onclick="switchMode('parent')">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="#fff" stroke-width="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.6" fill="#fff"/></svg>
+      家长模式
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 数据：象形字库 ===================== */
+const LIB = [
+  {zi:'日',py:'rì',mean:'太阳',ci:'日子',w1:'日水',w2:'日山',svg:`<circle cx="50" cy="50" r="36" fill="#FFD23F"/><circle cx="50" cy="50" r="11" fill="#FF7B00"/>`},
+  {zi:'月',py:'yuè',mean:'月亮',ci:'月亮',w1:'月火',w2:'月门',svg:`<path d="M58 12 A38 38 0 1 0 58 88 A30 30 0 1 1 58 12 Z" fill="#FFE08A" stroke="#E8B84B" stroke-width="2"/>`},
+  {zi:'山',py:'shān',mean:'高山',ci:'大山',w1:'山火',w2:'山木',svg:`<polygon points="12,82 32,40 52,82" fill="#7FB069"/><polygon points="40,82 62,28 84,82" fill="#4F7A5B"/><rect x="8" y="80" width="84" height="8" rx="3" fill="#6B4F2A"/>`},
+  {zi:'水',py:'shuǐ',mean:'喝水的水',ci:'河水',w1:'水人',w2:'水石',svg:`<path d="M12 32 q14 -14 28 0 t28 0" fill="none" stroke="#4D96FF" stroke-width="7" stroke-linecap="round"/><path d="M12 52 q14 -14 28 0 t28 0" fill="none" stroke="#4D96FF" stroke-width="7" stroke-linecap="round"/><path d="M12 72 q14 -14 28 0 t28 0" fill="none" stroke="#4D96FF" stroke-width="7" stroke-linecap="round"/>`},
+  {zi:'火',py:'huǒ',mean:'火苗',ci:'火山',w1:'火口',w2:'火目',svg:`<path d="M50 12 C66 34 70 52 56 70 C70 64 64 84 50 88 C36 84 30 64 44 70 C30 52 34 34 50 12 Z" fill="#FF6B35"/><path d="M50 40 C58 52 58 64 50 78 C42 64 42 52 50 40 Z" fill="#FFD23F"/>`},
+  {zi:'木',py:'mù',mean:'树木',ci:'木头',w1:'木田',w2:'木雨',svg:`<rect x="45" y="44" width="10" height="44" rx="3" fill="#8B5A2B"/><circle cx="50" cy="34" r="24" fill="#6AB04C"/>`},
+  {zi:'人',py:'rén',mean:'小人儿',ci:'大人',w1:'人石',w2:'人鸟',svg:`<circle cx="50" cy="24" r="11" fill="#FFB085"/><path d="M50 36 L40 86 M50 36 L60 86 M50 50 L30 70 M50 50 L70 70" stroke="#FFB085" stroke-width="8" fill="none" stroke-linecap="round"/>`},
+  {zi:'口',py:'kǒu',mean:'嘴巴',ci:'口水',w1:'口鱼',w2:'口心',svg:`<rect x="28" y="34" width="44" height="34" rx="10" fill="#FF9F1C" stroke="#E07B00" stroke-width="3"/><path d="M40 56 q10 8 20 0" stroke="#E07B00" stroke-width="3" fill="none" stroke-linecap="round"/>`},
+  {zi:'目',py:'mù',mean:'眼睛',ci:'目光',w1:'目马',w2:'目禾',svg:`<ellipse cx="50" cy="50" rx="34" ry="20" fill="#FFFFFF" stroke="#3A3A3A" stroke-width="3"/><circle cx="50" cy="50" r="9" fill="#3A3A3A"/>`},
+  {zi:'田',py:'tián',mean:'田地',ci:'田地',w1:'田门',w2:'田月',svg:`<rect x="26" y="28" width="48" height="48" rx="6" fill="#A8D08D" stroke="#5C8A3A" stroke-width="3"/><line x1="50" y1="28" x2="50" y2="76" stroke="#5C8A3A" stroke-width="3"/><line x1="26" y1="52" x2="74" y2="52" stroke="#5C8A3A" stroke-width="3"/>`},
+  {zi:'石',py:'shí',mean:'石头',ci:'石头',w1:'石水',w2:'石火',svg:`<path d="M22 62 Q16 36 46 34 Q78 32 74 60 Q78 84 48 84 Q22 84 22 62 Z" fill="#9E9E9E" stroke="#6E6E6E" stroke-width="3"/>`},
+  {zi:'门',py:'mén',mean:'大门',ci:'门口',w1:'门山',w2:'门木',svg:`<rect x="28" y="22" width="16" height="62" rx="4" fill="#C98A3B" stroke="#8A5A1B" stroke-width="3"/><rect x="56" y="22" width="16" height="62" rx="4" fill="#C98A3B" stroke="#8A5A1B" stroke-width="3"/>`},
+  {zi:'雨',py:'yǔ',mean:'下雨',ci:'雨水',w1:'雨人',w2:'雨田',svg:`<path d="M30 40 a14 14 0 0 1 28 -4 a12 12 0 0 1 12 18 H34 a12 12 0 0 1 -4 -14 Z" fill="#BFD7ED" stroke="#7FA8CE" stroke-width="2"/><line x1="38" y1="62" x2="36" y2="80" stroke="#4D96FF" stroke-width="4" stroke-linecap="round"/><line x1="52" y1="62" x2="50" y2="80" stroke="#4D96FF" stroke-width="4" stroke-linecap="round"/><line x1="66" y1="62" x2="64" y2="80" stroke="#4D96FF" stroke-width="4" stroke-linecap="round"/>`},
+  {zi:'禾',py:'hé',mean:'禾苗',ci:'禾苗',w1:'禾口',w2:'禾心',svg:`<line x1="50" y1="20" x2="50" y2="84" stroke="#6AB04C" stroke-width="6" stroke-linecap="round"/><ellipse cx="50" cy="34" rx="9" ry="6" fill="#8BC34A"/><ellipse cx="40" cy="46" rx="8" ry="5" fill="#8BC34A"/><ellipse cx="60" cy="46" rx="8" ry="5" fill="#8BC34A"/><ellipse cx="50" cy="58" rx="9" ry="6" fill="#8BC34A"/>`},
+  {zi:'鸟',py:'niǎo',mean:'小鸟',ci:'飞鸟',w1:'鸟石',w2:'鸟木',svg:`<path d="M20 60 Q30 30 55 38 Q80 44 78 62 Q70 78 50 74 Q30 72 20 60 Z" fill="#FFC107" stroke="#E0A800" stroke-width="2"/><circle cx="64" cy="50" r="4" fill="#3A3A3A"/><path d="M78 56 L90 52 L78 62 Z" fill="#FF7043"/><path d="M30 64 L20 72 M40 66 L34 76" stroke="#FF7043" stroke-width="3" stroke-linecap="round"/>`},
+  {zi:'鱼',py:'yú',mean:'小鱼',ci:'鱼儿',w1:'鱼火',w2:'鱼月',svg:`<ellipse cx="46" cy="52" rx="30" ry="18" fill="#4FC3F7" stroke="#0288D1" stroke-width="2"/><path d="M74 52 L92 38 L92 66 Z" fill="#4FC3F7" stroke="#0288D1" stroke-width="2"/><circle cx="34" cy="48" r="5" fill="#FFFFFF"/><circle cx="34" cy="48" r="2.5" fill="#000"/><path d="M40 60 q10 6 20 0" stroke="#0288D1" stroke-width="2" fill="none"/>`},
+  {zi:'心',py:'xīn',mean:'爱心',ci:'心情',w1:'心田',w2:'心门',svg:`<path d="M50 78 C18 54 24 26 50 44 C76 26 82 54 50 78 Z" fill="#FF5D8F"/>`},
+  {zi:'马',py:'mǎ',mean:'小马',ci:'马车',w1:'马水',w2:'马目',svg:`<path d="M30 78 L30 50 Q30 30 50 30 L62 30 Q72 30 72 42 L72 54 Q72 60 64 60 L64 78" fill="none" stroke="#A1887F" stroke-width="8" stroke-linecap="round"/><path d="M62 30 Q60 18 70 16" stroke="#A1887F" stroke-width="8" stroke-linecap="round" fill="none"/><circle cx="60" cy="40" r="3" fill="#3A3A3A"/><path d="M30 78 L24 88 M30 78 L36 88 M64 78 L60 88 M64 78 L70 88" stroke="#A1887F" stroke-width="6" stroke-linecap="round"/>`}
+];
+const LIB_MAP = {}; LIB.forEach(c=>LIB_MAP[c.zi]=c);
+
+/* ===================== 状态 ===================== */
+const PREFIX = 'wb_shizi_';
+let S = null;
+let mode = 'kid';
+let kidView = 'home';        // home | practice
+let prac = {queue:[], idx:0, correct:0, locked:false};
+
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function load(){
+  const raw = localStorage.getItem(PREFIX+'state');
+  if(raw){ try{ S = JSON.parse(raw); }catch(e){ S=null; } }
+  if(!S || !S.inited){ seed(); }
+  rollDaily();
+}
+function save(){ localStorage.setItem(PREFIX+'state', JSON.stringify(S)); }
+function seed(){
+  S = {
+    inited:1,
+    stars:8,
+    index:0,
+    everLearned:{},
+    daily:null,
+    rewards:[
+      {id:rid(), name:'贴纸一张', cost:10, color:'#FFD23F'},
+      {id:rid(), name:'去公园玩', cost:30, color:'#6AB04C'},
+      {id:rid(), name:'多看一集动画片', cost:20, color:'#4D96FF'}
+    ],
+    pending:[],
+    redeemed:[],
+    parentpwd:null,
+    settings:{daily:5}
+  };
+  // 示例：一条待确认兑换（模拟逾期项，让首屏有“今天要处理”）
+  const old = new Date(); old.setDate(old.getDate()-2);
+  S.pending.push({id:rid(), rewardId:null, name:'贴纸一张', cost:10, time:old.toISOString()});
+  genNewDaily(true);
+  save();
+}
+function rid(){ return 'i'+Math.random().toString(36).slice(2,9); }
+
+function dailyChars(){
+  const n = S.settings.daily||5;
+  const arr=[];
+  for(let i=0;i<n;i++){ arr.push(LIB[(S.index+i)%LIB.length].zi); }
+  return arr;
+}
+function genNewDaily(resetLearned){
+  S.daily = {date:todayStr(), chars:dailyChars(), learned:{}};
+}
+function isComplete(d){ return d && d.chars && d.chars.every(z=>d.learned && d.learned[z]); }
+function rollDaily(){
+  const t = todayStr();
+  if(!S.daily){ genNewDaily(); }
+  else if(S.daily.date !== t){
+    if(isComplete(S.daily)){ S.index = (S.index + S.daily.chars.length) % LIB.length; genNewDaily(); }
+    else { S.daily.date = t; } // 昨天没做完 → 滚到今天，不消失
+  }
+}
+
+/* ===================== 渲染 ===================== */
+function render(){
+  const app = document.getElementById('app');
+  if(mode==='kid') app.innerHTML = renderKid();
+  else app.innerHTML = renderParent();
+  window.scrollTo(0,0);
+}
+function starSvg(c){return `<svg viewBox="0 0 24 24" fill="${c||'#FFD23F'}"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>`;}
+function bookSvg(){return `<svg viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h5v16H6a2 2 0 0 0-2 2V5z" fill="#FF8C42"/><path d="M20 5a2 2 0 0 0-2-2h-5v16h5a2 2 0 0 1 2 2V5z" fill="#FFB05C"/></svg>`;}
+function gameSvg(){return `<svg viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="10" rx="5" fill="#6AB04C"/><circle cx="8" cy="12" r="1.6" fill="#fff"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><circle cx="16" cy="12" r="1.6" fill="#fff"/><path d="M18 10v4M16 12h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>`;}
+function giftSvg(c){return `<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="2" fill="${c||'#FF5D8F'}"/><rect x="3" y="9" width="18" height="4" fill="${c||'#FF5D8F'}"/><path d="M12 5v15" stroke="#fff" stroke-width="2"/><path d="M12 5c-2-3-6-2-5 1 1 2 4 1 5-1zM12 5c2-3 6-2 5 1-1 2-4 1-5-1z" fill="${c||'#FFD23F'}"/></svg>`;}
+
+function renderKid(){
+  if(kidView==='practice') return renderPractice();
+  const d = S.daily;
+  const learnedCount = d.chars.filter(z=>d.learned[z]).length;
+  const total = d.chars.length;
+  const done = learnedCount>=total;
+  const pct = Math.round(learnedCount/total*100);
+  const overdue = S.pending.length>0 && S.pending.some(p=> (new Date(p.time) < new Date(Date.now()-86400000)));
+  // handler 卡片
+  let handler = `<div class="section handler${overdue?' overdue':''}">
+      <div class="handler-top">
+        <h2>${starSvg('#FF8C42')} 今天要学 ${total} 个字</h2>
+        <span class="progress-pill">${learnedCount}/${total} 已认识</span>
+      </div>
+      <div class="bar"><span style="width:${pct}%"></span></div>
+      <div class="mt center">
+        <button class="btn green" onclick="finishToday()">${starSvg('#fff')} ${done?'已经学完啦，真棒！':'一键完成今日'}</button>
+      </div>
+      <p class="muted center mt">${done?'今天认字完成，去闯关领奖励吧～':'点下面的卡片翻一翻，认识就点“我认识啦”。'}</p>
+    </div>`;
+
+  // 象形字卡片
+  let cards = d.chars.map((z,i)=>{
+    const c = LIB_MAP[z];
+    const lk = d.learned[z];
+    return `<div class="card${lk?' done':''}" id="card${i}" onclick="flip(${i})">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            ${lk?'<div class="done-badge">✓</div>':''}
+            <span class="zi">${z}</span>
+            <span class="hint">点我翻面</span>
+          </div>
+          <div class="card-face card-back">
+            <svg viewBox="0 0 100 100">${c.svg}</svg>
+            <div class="py">${c.py}</div>
+            <div class="mean">${c.mean}</div>
+            ${lk?'<div class="mini-btn btn green sm" onclick="event.stopPropagation()">已认识 ✓</div>':'<div class="mini-btn btn sm" onclick="event.stopPropagation();markLearned(\''+z+'\')">我认识啦</div>'}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // 闯关积分
+  const lvl = Math.floor(S.stars/10)+1;
+  const inLvl = S.stars%10;
+  const R=58, C=2*Math.PI*R, off=C*(1-inLvl/10);
+  const rewards = S.rewards.map(r=>{
+    const can = S.stars>=r.cost;
+    return `<div class="reward">
+        <div class="ico">${giftSvg(r.color)}</div>
+        <div class="nm">${r.name}</div>
+        <div class="cost">${r.cost} 颗星</div>
+        <button class="btn ${can?'pink':'ghost'} sm block" ${can?'':'disabled'} onclick="requestReward('${r.id}')">${can?'我要兑换':'星不够'}</button>
+      </div>`;
+  }).join('') || '<p class="muted">家长还没设置奖励，去家长模式添加吧～</p>';
+
+  const tip = S.stars>=30 ? `<div class="tip">${starSvg('#E76F24')} 数据已积累 ${S.stars} 条，建议点右上角“导出”备份一下哦！</div>` : '';
+
+  return handler + `
+    ${tip}
+    <div class="section">
+      <h3 class="sec-title">${bookSvg()} 象形字卡片</h3>
+      <div class="cards">${cards}</div>
+    </div>
+    <div class="section">
+      <h3 class="sec-title">${gameSvg()} 组词练习</h3>
+      <p class="muted">看看字，选出正确的词，答对得星星！</p>
+      <div class="mt"><button class="btn blue block" onclick="startPractice()">${gameSvg()} 开始练习</button></div>
+    </div>
+    <div class="section">
+      <h3 class="sec-title">${giftSvg('#FF5D8F')} 闯关积分</h3>
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="${R}" fill="none" stroke="#FFE3B3" stroke-width="12"/>
+            <circle cx="65" cy="65" r="${R}" fill="none" stroke="#FFD23F" stroke-width="12" stroke-linecap="round"
+              stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 65 65)"/>
+          </svg>
+          <div class="ctr"><b>${S.stars}</b><small>颗星</small></div>
+        </div>
+        <div class="level-info">
+          <div class="lv">第 ${lvl} 关</div>
+          <p>再得 ${10-inLvl} 颗星升下一关！<br>累计 ${S.stars} 颗星可以换礼物～</p>
+        </div>
+      </div>
+      <h3 class="sec-title mt" style="font-size:17px">${giftSvg('#FF8C42')} 奖励商城</h3>
+      <div class="rewards">${rewards}</div>
+    </div>`;
+}
+
+function renderPractice(){
+  const q = prac.queue;
+  if(prac.idx>=q.length){
+    return `<div class="section center">
+        <div style="font-size:60px">${starSvg('#FFD23F')}</div>
+        <h2 style="color:var(--primary-d)">练习完成！</h2>
+        <p class="muted">本次答对 ${prac.correct}/${q.length} 个，获得 ${prac.correct} 颗星</p>
+        <div class="mt"><button class="btn green" onclick="exitPractice()">${starSvg('#fff')} 回到首页</button></div>
+      </div>`;
+  }
+  const z = q[prac.idx];
+  const c = LIB_MAP[z];
+  // 选项：正确 + 两个错误，打乱
+  let opts = [{t:c.ci,ok:true},{t:c.w1,ok:false},{t:c.w2,ok:false}];
+  opts.sort(()=>Math.random()-0.5);
+  const optHtml = opts.map((o,i)=>`<div class="opt" id="opt${i}" onclick="answer(${i},${o.ok})">${o.t}</div>`).join('');
+  return `<div class="section">
+      <div class="handler-top">
+        <h2 style="color:var(--primary-d)">${gameSvg()} 组词练习 ${prac.idx+1}/${q.length}</h2>
+        <span class="progress-pill">对 ${prac.correct}</span>
+      </div>
+      <div class="practice-char">
+        <div class="big">${z}</div>
+        <svg viewBox="0 0 100 100">${c.svg}</svg>
+        <p class="muted">“${z}” 可以组成哪个词？</p>
+      </div>
+      <div class="opts">${optHtml}</div>
+      <div class="practice-foot">
+        <button class="btn ghost sm" onclick="exitPractice()">退出</button>
+        <span class="muted">点错的词也没关系，再试一次～</span>
+      </div>
+    </div>`;
+}
+
+/* ===================== 交互 ===================== */
+function flip(i){
+  const el=document.getElementById('card'+i);
+  if(el) el.classList.toggle('flip');
+}
+function markLearned(z){
+  const d=S.daily;
+  if(d.learned[z]) return;
+  d.learned[z]=true;
+  if(!S.everLearned[z]){ S.everLearned[z]=true; S.stars++; }
+  save(); render(); toast('认识啦！+'+(S.everLearned[z]?1:0)+' 颗星');
+}
+function finishToday(){
+  const d=S.daily; let gained=0;
+  d.chars.forEach(z=>{ if(!d.learned[z]){ d.learned[z]=true; if(!S.everLearned[z]){ S.everLearned[z]=true; S.stars++; gained++; } } });
+  save(); render(); toast(gained>0?('今日完成！+'+gained+' 颗星 🎉'):'今天已经学完啦！');
+}
+function startPractice(){
+  prac.queue = S.daily.chars.slice();
+  prac.idx=0; prac.correct=0; prac.locked=false;
+  kidView='practice'; render();
+}
+function answer(i,ok){
+  if(prac.locked) return;
+  const el=document.getElementById('opt'+i);
+  if(ok){
+    el.classList.add('correct'); prac.locked=true; prac.correct++;
+    S.stars++; save();
+    setTimeout(()=>{ prac.idx++; prac.locked=false; render(); },650);
+  }else{
+    el.classList.add('wrong');
+    setTimeout(()=>{ if(el) el.classList.remove('wrong'); },450);
+  }
+}
+function exitPractice(){ kidView='home'; render(); }
+
+function requestReward(id){
+  const r = S.rewards.find(x=>x.id===id);
+  if(!r || S.stars<r.cost) return;
+  S.pending.push({id:rid(), rewardId:r.id, name:r.name, cost:r.cost, time:new Date().toISOString()});
+  save(); render(); toast('已申请，等爸爸妈妈确认～');
+}
+
+/* ===================== 家长模式 ===================== */
+function switchMode(m){
+  mode=m; kidView='home';
+  document.getElementById('tabKid').classList.toggle('active',m==='kid');
+  document.getElementById('tabPar').classList.toggle('active',m==='parent');
+  render();
+}
+function parentUnlocked(){ return !!S.parentpwd && sessionStorage.getItem(PREFIX+'ok')==='1'; }
+
+function renderParent(){
+  if(!S.parentpwd){
+    return `<div class="gate">
+      <svg class="lock" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="#FF8C42" stroke-width="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#FF8C42" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.8" fill="#FF8C42"/></svg>
+      <h2 style="color:var(--primary-d)">设置 4 位家长密码</h2>
+      <p class="muted">用来锁住家长设置，小朋友打不开。</p>
+      <input id="pw1" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+      <div class="err" id="pwErr"></div>
+      <button class="btn block" onclick="setPwd()">${giftSvg('#fff')} 确定设置</button>
+    </div>`;
+  }
+  if(!parentUnlocked()){
+    return `<div class="gate">
+      <svg class="lock" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="#FF8C42" stroke-width="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#FF8C42" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.8" fill="#FF8C42"/></svg>
+      <h2 style="color:var(--primary-d)">家长模式已锁定</h2>
+      <p class="muted">请输入 4 位密码</p>
+      <input id="pw2" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+      <div class="err" id="pwErr"></div>
+      <button class="btn block" onclick="checkPwd()">${giftSvg('#fff')} 解锁</button>
+    </div>`;
+  }
+  // 已解锁 → 面板
+  const overdue = S.pending.filter(p=>new Date(p.time) < new Date(Date.now()-86400000));
+  let handler = '';
+  if(S.pending.length>0){
+    const items = S.pending.map(p=>{
+      const old = new Date(p.time) < new Date(Date.now()-86400000);
+      return `<div class="item">
+          <div class="info"><b>${p.name}</b><small>${old?'⚠ 待确认较久 · ':'待确认 · '}${fmtTime(p.time)}</small></div>
+          <div class="acts">
+            <button class="btn green sm" onclick="confirmReward('${p.id}')">确认</button>
+            <button class="btn ghost sm" onclick="rejectReward('${p.id}')">驳回</button>
+          </div>
+        </div>`;
+    }).join('');
+    handler = `<div class="section handler${overdue.length?' overdue':''}">
+        <h2>${giftSvg('#FF5D8F')} 今天要处理：${S.pending.length} 个兑换申请</h2>
+        <div class="mt">${items}</div>
+      </div>`;
+  }
+
+  // 发布任务（安排每日字数 / 重排）
+  const taskSec = `<div class="psec">
+      <h3>${bookSvg()} 发布认字任务</h3>
+      <div class="inline-form">
+        <span class="muted">每天学</span>
+        <input id="dailyN" type="number" inputmode="numeric" min="1" max="18" value="${S.settings.daily}">
+        <span class="muted">个字</span>
+        <button class="btn sm" onclick="setDaily()">保存</button>
+      </div>
+      <div class="row2">
+        <button class="btn blue" onclick="rearrange()">${bookSvg()} 重排新字（从头学）</button>
+        <button class="btn ghost" onclick="resetProgress()">${starSvg('#E76F24')} 重置今日进度</button>
+      </div>
+      <p class="muted mt">当前进度：已学到第 ${Math.min(S.index+1,LIB.length)}/${LIB.length} 个字 · 累计 ${Object.keys(S.everLearned).length} 个字认过</p>
+    </div>`;
+
+  // 奖励管理
+  const rewardList = S.rewards.map(r=>`<div class="item">
+      <div class="ico" style="width:34px">${giftSvg(r.color)}</div>
+      <div class="info"><b>${r.name}</b><small>需 ${r.cost} 颗星</small></div>
+      <div class="acts"><button class="btn ghost sm" onclick="delReward('${r.id}')">删除</button></div>
+    </div>`).join('') || '<p class="muted">还没有奖励</p>';
+  const rewardSec = `<div class="psec">
+      <h3>${giftSvg('#FF5D8F')} 奖励管理</h3>
+      <div class="inline-form">
+        <input id="rName" placeholder="奖励名称，如：去公园玩" maxlength="20">
+        <input id="rCost" type="number" inputmode="numeric" min="1" placeholder="星数">
+        <button class="btn pink sm" onclick="addReward()">添加</button>
+      </div>
+      <div class="mt">${rewardList}</div>
+    </div>`;
+
+  // 已兑换记录
+  const redList = S.redeemed.slice().reverse().map(r=>`<div class="item"><div class="ico" style="width:30px">${giftSvg('#6AB04C')}</div><div class="info"><b>${r.name}</b><small>${r.cost} 颗星 · ${fmtTime(r.time)}</small></div></div>`).join('') || '<p class="muted">还没有兑换记录</p>';
+
+  // 字库预览
+  const libPrev = LIB.map(c=>`<div style="display:inline-flex;flex-direction:column;align-items:center;width:62px;margin:6px"><div style="font-size:30px;font-weight:900;color:var(--primary-d)">${c.zi}</div><svg viewBox="0 0 100 100" style="width:40px;height:40px">${c.svg}</svg></div>`).join('');
+
+  const danger = `<div class="psec">
+      <h3 style="color:#D12B2B">${giftSvg('#D12B2B')} 数据管理</h3>
+      <div class="row2">
+        <button class="btn ghost" onclick="clearSample()">清空示例数据</button>
+        <button class="btn ghost" style="color:#D12B2B;border-color:#FFB3B3" onclick="clearAll()">清空全部数据</button>
+      </div>
+      <p class="muted mt">清空示例：移除演示奖励/兑换申请，保留字库。清空全部：重置整个工作台。</p>
+    </div>`;
+
+  return handler + taskSec + rewardSec + `
+    <div class="psec">
+      <h3>${giftSvg('#6AB04C')} 已兑换记录</h3>
+      ${redList}
+    </div>
+    <div class="psec">
+      <h3>${bookSvg()} 字库预览（${LIB.length} 个象形字）</h3>
+      <div class="center">${libPrev}</div>
+    </div>` + danger;
+}
+function fmtTime(iso){
+  const d=new Date(iso);
+  return (d.getMonth()+1)+'月'+d.getDate()+'日 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function setPwd(){
+  const v=document.getElementById('pw1').value;
+  if(!/^\d{4}$/.test(v)){ document.getElementById('pwErr').textContent='请输入 4 位数字'; return; }
+  S.parentpwd=v; save(); sessionStorage.setItem(PREFIX+'ok','1'); render(); toast('密码已设置');
+}
+function checkPwd(){
+  const v=document.getElementById('pw2').value;
+  if(v===S.parentpwd){ sessionStorage.setItem(PREFIX+'ok','1'); render(); }
+  else document.getElementById('pwErr').textContent='密码不对，再试试';
+}
+function setDaily(){
+  let n=parseInt(document.getElementById('dailyN').value)||5;
+  n=Math.max(1,Math.min(18,n));
+  S.settings.daily=n; save(); render(); toast('已设为每天 '+n+' 个字');
+}
+function rearrange(){
+  if(!confirm('重新从头学？当前进度会回到第一个字。')) return;
+  S.index=0; genNewDaily(); save(); render(); toast('已重排，从第一个字开始');
+}
+function resetProgress(){
+  if(!confirm('把今天的认字进度清空，重新开始今天？')) return;
+  genNewDaily(); save(); render(); toast('今日进度已重置');
+}
+function addReward(){
+  const nm=document.getElementById('rName').value.trim();
+  let c=parseInt(document.getElementById('rCost').value)||0;
+  if(!nm){ toast('请填写奖励名称'); return; }
+  if(c<1){ toast('请填写正确星数'); return; }
+  S.rewards.push({id:rid(),name:nm,cost:c,color:pickColor()});
+  save(); render(); toast('奖励已添加');
+}
+function pickColor(){ const a=['#FFD23F','#6AB04C','#4D96FF','#FF5D8F','#FF8C42','#9B5DE5']; return a[Math.floor(Math.random()*a.length)]; }
+function delReward(id){ S.rewards=S.rewards.filter(r=>r.id!==id); save(); render(); }
+function confirmReward(id){
+  const p=S.pending.find(x=>x.id===id); if(!p) return;
+  if(S.stars < p.cost){ toast('星星不够，无法兑换'); return; }
+  S.stars -= p.cost;
+  S.redeemed.push({id:rid(),name:p.name,cost:p.cost,time:new Date().toISOString()});
+  S.pending=S.pending.filter(x=>x.id!==id);
+  save(); render(); toast('兑换成功！奖励：'+p.name);
+}
+function rejectReward(id){ S.pending=S.pending.filter(x=>x.id!==id); save(); render(); toast('已驳回'); }
+
+function clearSample(){
+  if(!confirm('清空示例数据？会移除演示的奖励和兑换申请，字库和设置保留。')) return;
+  S.pending=[]; S.redeemed=[]; S.stars=0; S.index=0; S.everLearned={}; genNewDaily(); save();
+  if(mode==='kid') kidView='home';
+  render(); toast('示例数据已清空');
+}
+function clearAll(){
+  if(!confirm('确定清空全部数据？工作台会恢复到初始样子，此操作不可恢复！')) return;
+  Object.keys(localStorage).forEach(k=>{ if(k.startsWith(PREFIX)) localStorage.removeItem(k); });
+  sessionStorage.removeItem(PREFIX+'ok');
+  S=null; load(); mode='kid'; kidView='home';
+  document.getElementById('tabKid').classList.add('active');
+  document.getElementById('tabPar').classList.remove('active');
+  render(); toast('已全部清空');
+}
+
+/* ===================== 备份 ===================== */
+function exportJSON(){
+  const data={};
+  Object.keys(localStorage).forEach(k=>{ if(k.startsWith(PREFIX)) data[k]=localStorage.getItem(k); });
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='宝宝识字台备份_'+todayStr()+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('已导出备份');
+}
+function importJSON(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(r.result);
+      let n=0;
+      Object.keys(obj).forEach(k=>{ if(k.startsWith(PREFIX)){ localStorage.setItem(k,obj[k]); n++; } });
+      S=null; load(); mode='kid'; kidView='home';
+      document.getElementById('tabKid').classList.add('active');
+      document.getElementById('tabPar').classList.remove('active');
+      render(); toast('已导入 '+n+' 条数据');
+    }catch(err){ alert('文件格式不对，导入失败'); }
+    e.target.value='';
+  };
+  r.readAsText(f);
+}
+
+/* ===================== 工具 ===================== */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ===================== 启动 ===================== */
+load();
+render();
+</script>
+</body>
+</html>
